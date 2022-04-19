@@ -14,7 +14,7 @@ var (
 )
 
 func Setup() {
-	store, _ := redis.NewStore(10, "tcp", "localhost:6379", "", []byte("secret"))
+	store, _ := redis.NewStore(10, "tcp", "localhost:6379", "", []byte("Ju8AbyXfnjoMktzh"))
 	router.Use(sessions.Sessions("gin-session", store), templateExecute, pagination)
 
 	router.Static("/js", "js/")
