@@ -1,0 +1,92 @@
+{{define "content"}}
+{{with .Data}}
+<div class="columns">
+    <aside class="menu column is-2">
+        <p class="menu-label">
+            图书类别
+        </p>
+        <ul class="menu-list">
+            <li><a href="./"> 全部 </a></li>
+            {{range .Categories}}
+            <li><a href="./{{.}}"> {{.}} </a></li>
+            {{end}}
+        </ul>
+    </aside>
+    <main class="column is-8">
+        <form action="./" method="get" class="columns is-centered">
+            <div class="field has-addons column is-two-fifths">
+                <div class="control">
+                    <input class="input" type="search" name="info" placeholder="搜索ISBN/书名/作者">
+                </div>
+                <div class="control">
+                    <button type="submit" class="button is-info">搜索</button>
+                </div>
+            </div>
+            <input type="hidden" name="category" value="{{.Category}}">
+        </form>
+        <div class="columns row is-multiline">
+            {{range .Books}}
+            <div class="column card is-2">
+                <div class="card-image">
+                    <figure class="image is-4by5">
+                        <img src="https://bulma.io/images/placeholders/1280x960.png">
+                    </figure>
+                </div>
+                <div class="card-content">
+                    <p class="is-size-5 has-text-weight-bold"> {{.Name}} </p>
+                    <p> {{.Author}} </p>
+                    <p> ￥{{.Price}} </p>
+                </div>
+                <footer class="card-footer">
+                    <button class="card-footer-item modal-trigger button" data-target="modal-{{.ID}}">详情</button>
+                    <button onclick="addCartItem(this, '{{.ID}}')" class="card-footer-item button">
+                        <span class="icon is-small">
+                            <i class="fas fa-shopping-cart"></i>
+                        </span>
+                    </button>
+                </footer>
+            </div>
+            <div class="modal" id="modal-{{.ID}}">
+                <p>查看介绍</p>
+                <div class="modal-background"></div>
+                <div class="modal-card">
+                    <header class="modal-card-head">
+                        <h1 class="modal-card-title"> {{.Name}} </h1>
+                        <button class="delete" aria-label="close"></button>
+                    </header>
+                    <section class="modal-card-body">
+                        <p> 作者: {{.Author}} </p>
+                        <p> ISBN: {{.ISBN}} </p>
+                        <p class="content"> {{.Intro}} </p>
+                    </section>
+                </div>
+            </div>
+            {{end}}
+        </div>
+    </main>
+</div>
+{{end}}
+
+<footer class="footer">
+    {{template "pagination.html" .Paging}}
+</footer>
+
+<script>
+    async function addCartItem($button, id) {
+        $button.classList.add('is-loading')
+        let url = new URL('/add-cart-item', location.origin)
+        url.searchParams.set('id', id)
+        let response = await fetch(url)
+        switch (response.status) {
+            case 401:
+                alert('请先登录')
+                location.pathname = '/log-in'
+                break;
+            case 200:
+                alert('添加成功')
+                break;
+        }
+        $button.classList.remove('is-loading')
+    }
+</script>
+{{end}}
