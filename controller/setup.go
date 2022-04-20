@@ -25,6 +25,7 @@ func Setup() {
 
 	setupUser()
 	setupBooks()
+	setupCart()
 
 	router.Run()
 }

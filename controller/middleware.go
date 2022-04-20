@@ -2,13 +2,33 @@ package controller
 
 import (
 	"html/template"
+	"net/http"
 	"strconv"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
 type Paging struct {
 	Pre, Cur, Next, Total uint64
+}
+
+func auth(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+	_, ok := session.Get("userID").(uint64)
+	if !ok {
+		ctx.Status(http.StatusUnauthorized)
+		ctx.Abort()
+	}
+}
+
+func authRedirect(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+	_, ok := session.Get("userID").(uint64)
+	if !ok {
+		ctx.Redirect(http.StatusFound, "/user/log-in")
+		ctx.Abort()
+	}
 }
 
 func pagination(ctx *gin.Context) {

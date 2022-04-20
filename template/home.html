@@ -74,9 +74,7 @@
 <script>
     async function addCartItem($button, id) {
         $button.classList.add('is-loading')
-        let url = new URL('/add-cart-item', location.origin)
-        url.searchParams.set('id', id)
-        let response = await fetch(url)
+        let response = await fetch(`/cart/add/${id}`)
         switch (response.status) {
             case 401:
                 alert('请先登录')
