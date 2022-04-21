@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/Bit0r/online-store/middleware"
 	"github.com/Bit0r/online-store/model"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -12,9 +13,9 @@ import (
 
 func setupCart() {
 	cartGroup := router.Group("/cart")
-	cartGroup.POST("/book", auth, handleAddCart)
-	cartGroup.GET("/books", authRedirect, handleShowCart)
-	cartGroup.PUT("/book", auth, handleUpdateCart)
+	cartGroup.POST("/book", middleware.AuthUser, handleAddCart)
+	cartGroup.GET("/books", middleware.AuthUserRedirect, handleShowCart)
+	cartGroup.PUT("/book", middleware.AuthUser, handleUpdateCart)
 }
 
 func handleShowCart(ctx *gin.Context) {
@@ -40,7 +41,7 @@ func handleAddCart(ctx *gin.Context) {
 	bookID, _ := strconv.ParseUint(ctx.PostForm("id"), 0, 64)
 	err := model.AddCartItem(id, bookID)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		ctx.Status(http.StatusInternalServerError)
 	}
 }

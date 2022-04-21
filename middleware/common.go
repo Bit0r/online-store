@@ -1,11 +1,9 @@
-package controller
+package middleware
 
 import (
 	"html/template"
-	"net/http"
 	"strconv"
 
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,25 +11,7 @@ type Paging struct {
 	Pre, Cur, Next, Total uint64
 }
 
-func auth(ctx *gin.Context) {
-	session := sessions.Default(ctx)
-	_, ok := session.Get("userID").(uint64)
-	if !ok {
-		ctx.Status(http.StatusUnauthorized)
-		ctx.Abort()
-	}
-}
-
-func authRedirect(ctx *gin.Context) {
-	session := sessions.Default(ctx)
-	_, ok := session.Get("userID").(uint64)
-	if !ok {
-		ctx.Redirect(http.StatusFound, "/user/log-in")
-		ctx.Abort()
-	}
-}
-
-func pagination(ctx *gin.Context) {
+func Pagination(ctx *gin.Context) {
 	paging := Paging{Total: 0}
 	current, err := strconv.Atoi(ctx.Query("page"))
 	if err != nil || current == 0 {
@@ -60,15 +40,21 @@ func pagination(ctx *gin.Context) {
 	})
 }
 
-func templateExecute(ctx *gin.Context) {
+var tplRoot = "template/"
+
+func TemplateExecute(ctx *gin.Context) {
 	ctx.Next()
 
-	files, ok := ctx.Get("tpl_files")
+	_, ok := ctx.Get("tpl_files")
 	if !ok {
 		return
 	}
 
-	tpl, _ := template.ParseFiles(getFiles(files.([]string)...)...)
+	files := ctx.GetStringSlice("tpl_files")
+	for idx, file := range files {
+		files[idx] = tplRoot + file
+	}
+	tpl, _ := template.ParseFiles(files...)
 
 	data, _ := ctx.Get("tpl_data")
 	tpl.Execute(ctx.Writer, data)

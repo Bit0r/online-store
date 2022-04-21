@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/Bit0r/online-store/middleware"
 	"github.com/Bit0r/online-store/model"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -20,7 +21,7 @@ func setupBooks() {
 		data.Categories = model.GetCategories()
 
 		// 填充分页信息
-		paging := ctx.MustGet("paging").(Paging)
+		paging := ctx.MustGet("paging").(middleware.Paging)
 		paging.Total = model.CountBooks(data.Category)/step + 1
 		ctx.Set("paging", paging)
 
