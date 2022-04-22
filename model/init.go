@@ -12,18 +12,19 @@ var db *sql.DB
 
 func init() {
 	var config struct {
-		User     string
-		Password string
-		Host     string
-		Port     uint16
-		Name     string
+		User      string
+		Password  string
+		Host      string
+		Port      uint16
+		Name      string
+		ParseTime bool
 	}
 
 	conf.Unmarshal("database", "online_store_database", &config)
 
-	dsn := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v",
+	dsn := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?parseTime=%v",
 		config.User, config.Password,
 		config.Host, config.Port,
-		config.Name)
+		config.Name, config.ParseTime)
 	db, _ = sql.Open("mysql", dsn)
 }
