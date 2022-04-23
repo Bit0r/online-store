@@ -26,9 +26,9 @@ type Order struct {
 
 type Orders = []Order
 
-func AddOrder(userID uint64, addressID uint, booksID []uint64) (err error) {
+func AddOrder(userID uint64, addressID uint, booksID []uint64) (uint64, error) {
 	if len(booksID) == 0 {
-		return nil
+		return 0, nil
 	}
 
 	txn, _ := db.Begin()
@@ -37,7 +37,7 @@ func AddOrder(userID uint64, addressID uint, booksID []uint64) (err error) {
 	values(0, ?, ?, ?)`
 	result, err := txn.Exec(query, userID, addressID, "unpaid")
 	if err != nil {
-		return err
+		return 0, err
 	}
 	orderID, _ := result.LastInsertId()
 
@@ -54,7 +54,7 @@ func AddOrder(userID uint64, addressID uint, booksID []uint64) (err error) {
 	}
 	_, err = txn.Exec(query, args...)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	query = `update orders
@@ -64,24 +64,25 @@ func AddOrder(userID uint64, addressID uint, booksID []uint64) (err error) {
 	where id = ?`
 	_, err = txn.Exec(query, orderID, orderID)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	query = `delete from cart
 	where user_id = ? and book_id in (` + holders + ")"
 	_, err = txn.Exec(query, args[1:]...)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	txn.Commit()
-	return
+	return uint64(orderID), nil
 }
 
 func GetOrders(userID, offset, row_count uint64) (orders Orders, err error) {
 	query := `select id, order_time, total, status
 	from orders
-	where user_id = ?`
+	where user_id = ?
+	order by id desc`
 
 	var rs *sql.Rows
 	if row_count == 0 {

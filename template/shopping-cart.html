@@ -1,6 +1,6 @@
 {{define "content"}}
 <main class="section">
-    <form class="container" action="/order" target="_blank" method="post">
+    <form class="container" action="/order" method="post">
         <table class="table is-striped is-hoverable is-fullwidth">
             <thead>
                 <tr>
@@ -76,7 +76,6 @@
         let $tr = document.getElementById('tr-' + id)
         $loading = $tr.querySelector(quantity == 0 ? 'button' : '.control')
         $loading.classList.add('is-loading')
-
 
         let formData = new FormData()
         formData.set('id', id)
