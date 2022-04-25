@@ -106,7 +106,10 @@
         let total = 0
         for (const $tr of $tbody.rows) {
             if ($tr.querySelector('input').checked) {
+                $tr.classList.add('is-selected')
                 total += Number($tr.cells[4].textContent)
+            } else {
+                $tr.classList.remove('is-selected')
             }
         }
         $total.textContent = String(total)
