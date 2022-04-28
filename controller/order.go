@@ -12,10 +12,49 @@ import (
 	"github.com/samber/lo"
 )
 
+var statusI18n = map[string]string{
+	"unpaid":     "待付款",
+	"failed":     "失败",
+	"to_be_ship": "待发货",
+	"shipped":    "已发货，正在运输",
+	"success":    "成功",
+}
+
 func setupOrder() {
 	router.GET("/order/:id", middleware.AuthUserRedirect, handleGetOrder)
 	router.POST("/order", middleware.AuthUser, handleAddOrder)
 	router.PUT("/order", middleware.AuthUser, handleUpdateOrder)
+}
+
+func getOrders(needAdmin bool) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		userID := ctx.GetUint64("userID")
+		isAdmin := model.HasPrivilege(userID, "order")
+
+		var orders model.Orders
+		switch {
+		case needAdmin && isAdmin:
+			orders, _ = model.GetOrders(0, 0, 0)
+		case !needAdmin:
+			orders, _ = model.GetOrders(userID, 0, 0)
+		default:
+			ctx.Status(http.StatusForbidden)
+		}
+
+		for idx := range orders {
+			orders[idx].Status = statusI18n[orders[idx].Status]
+		}
+
+		ctx.Set("tpl_files", []string{"layout.html", "navbar.html", "orders.html"})
+		ctx.Set("tpl_data", orders)
+		if isAdmin && !needAdmin {
+			ctx.Set("sudo", "/admin/orders")
+		}
+
+		paging, _ := ctx.MustGet("paging").(middleware.Paging)
+		paging.Total = 1
+		ctx.Set("paging", paging)
+	}
 }
 
 func handleGetOrder(ctx *gin.Context) {
@@ -41,19 +80,13 @@ func handleGetOrder(ctx *gin.Context) {
 
 	// 访问模板
 	ctx.Set("tpl_files", []string{"layout.html", "order.html", "navbar.html"})
-	i18n := map[string]string{
-		"unpaid":     "待付款",
-		"failed":     "失败",
-		"to_be_ship": "待发货",
-		"shipped":    "已发货，正在运输",
-		"success":    "成功",
-	}
+
 	ctx.Set("tpl_data", struct {
 		model.Order
 		Address  model.Address
 		IsAdmin  bool
 		StatusCN string
-	}{order, address, isAdmin, i18n[order.Status]})
+	}{order, address, isAdmin, statusI18n[order.Status]})
 }
 
 func handleAddOrder(ctx *gin.Context) {

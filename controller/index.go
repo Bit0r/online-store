@@ -30,7 +30,7 @@ func setupBooks() {
 		ctx.Set("tpl_data", data)
 
 		// 设置模板
-		files := []string{"layout.html", "home.html", "navbar-guest.html", "pagination.html"}
+		files := []string{"layout.html", "home.html", "navbar-guest.html"}
 		if sessions.Default(ctx).Get("userID") != nil {
 			files[2] = "navbar.html"
 		}

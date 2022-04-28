@@ -42,5 +42,20 @@
             </div>
         </div>
     </div>
+
+    <div class="navbar-end">
+        <div class="navbar-item">
+            <div class="buttons">
+                {{with .Sudo}}
+                <a href="{{.}}" class="button is-danger">
+                    <strong>管理员模式</strong>
+                </a>
+                {{end}}
+                <a href="/user/log-out" class="button is-light is-primary">
+                    安全登出
+                </a>
+            </div>
+        </div>
+    </div>
 </nav>
 {{end}}

@@ -83,17 +83,22 @@ func AddOrder(userID uint64, addressID uint, booksID []uint64) (uint64, error) {
 
 func GetOrders(userID, offset, row_count uint64) (orders Orders, err error) {
 	query := `select id, order_time, total, status
-	from orders
-	where user_id = ?
-	order by id desc`
+	from orders`
+	args := []any{}
+
+	if userID != 0 {
+		query += " where user_id = ? "
+		args = append(args, userID)
+	}
+
+	query += " order by id desc "
 
 	var rs *sql.Rows
-	if row_count == 0 {
-		rs, err = db.Query(query, userID)
-	} else {
+	if row_count != 0 {
 		query += "limit ?, ?"
-		rs, err = db.Query(query, userID, offset, row_count)
+		args = append(args, offset, row_count)
 	}
+	rs, err = db.Query(query, args...)
 
 	if err != nil {
 		return nil, err

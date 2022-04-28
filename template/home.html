@@ -1,5 +1,4 @@
 {{define "content"}}
-{{with .Data}}
 <div class="columns">
     <aside class="menu column is-2">
         <p class="menu-label">
@@ -65,11 +64,6 @@
         </div>
     </main>
 </div>
-{{end}}
-
-<footer class="footer">
-    {{template "pagination.html" .Paging}}
-</footer>
 
 <script>
     async function addCartItem($button, id) {

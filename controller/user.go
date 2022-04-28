@@ -13,7 +13,7 @@ func setupUser() {
 	userGroup := router.Group("/user")
 	userGroup.Any("/log-in", handleLogin)
 	userGroup.Any("/sign-up", handleSignUp)
-	userGroup.GET("/orders", middleware.AuthUserRedirect, handleUserOrders)
+	userGroup.GET("/orders", middleware.AuthUserRedirect, getOrders(false))
 }
 
 func handleLogin(ctx *gin.Context) {
@@ -48,33 +48,4 @@ func handleSignUp(ctx *gin.Context) {
 			ctx.Status(http.StatusUnauthorized)
 		}
 	}
-}
-
-func handleUserOrders(ctx *gin.Context) {
-	session := sessions.Default(ctx)
-	id, _ := session.Get("userID").(uint64)
-
-	orders, _ := model.GetOrders(id, 0, 0)
-
-	for idx := range orders {
-		var status string
-		switch orders[idx].Status {
-		case "unpaid":
-			status = "未付款"
-		case "failed":
-			status = "失败"
-		case "transit":
-			status = "正在运输"
-		case "success":
-			status = "成功"
-		}
-		orders[idx].Status = status
-	}
-
-	ctx.Set("tpl_files", []string{"layout.html", "navbar.html", "orders.html", "pagination.html"})
-	ctx.Set("tpl_data", orders)
-
-	paging, _ := ctx.MustGet("paging").(middleware.Paging)
-	paging.Total = 1
-	ctx.Set("paging", paging)
 }

@@ -1,6 +1,6 @@
 {{define "content"}}
 <main class="section">
-    {{range .Data}}
+    {{range .}}
     <div class="container box">
         <div class="level">
             <div class="level-item">
@@ -41,9 +41,6 @@
     </div>
     {{end}}
 </main>
-<footer class="footer">
-    {{template "pagination.html" .Paging}}
-</footer>
 <style>
     .box {
         max-width: 480px !important;

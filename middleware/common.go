@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"html/template"
+	"log"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -26,6 +27,7 @@ func Pagination(ctx *gin.Context) {
 	paging = ctx.MustGet("paging").(Paging)
 	if paging.Total == 0 {
 		// 确认是否需要分页
+		ctx.Set("paging", nil)
 		return
 	}
 
@@ -34,10 +36,7 @@ func Pagination(ctx *gin.Context) {
 		paging.Cur = paging.Total
 	}
 	paging.Pre, paging.Next = paging.Cur-1, paging.Cur+1
-	ctx.Set("tpl_data", map[string]any{
-		"Data":   ctx.MustGet("tpl_data"),
-		"Paging": paging,
-	})
+	ctx.Set("paging", paging)
 }
 
 var tplRoot = "template/"
@@ -51,11 +50,35 @@ func TemplateExecute(ctx *gin.Context) {
 	}
 
 	files := ctx.GetStringSlice("tpl_files")
+	files = append(files, "pagination.html")
 	for idx, file := range files {
 		files[idx] = tplRoot + file
 	}
 	tpl, _ := template.ParseFiles(files...)
 
-	data, _ := ctx.Get("tpl_data")
-	tpl.Execute(ctx.Writer, data)
+	data := gin.H{}
+	tpl_data, ok := ctx.Get("tpl_data")
+	if !ok {
+		err := tpl.Execute(ctx.Writer, nil)
+		if err != nil {
+			log.Println(err)
+		}
+		return
+	}
+	data["Data"] = tpl_data
+
+	paging, ok := ctx.MustGet("paging").(Paging)
+	if ok {
+		data["Paging"] = paging
+	}
+
+	sudo, ok := ctx.Get("sudo")
+	if ok {
+		data["Sudo"], _ = sudo.(string)
+	}
+
+	err := tpl.Execute(ctx.Writer, data)
+	if err != nil {
+		log.Println(err)
+	}
 }

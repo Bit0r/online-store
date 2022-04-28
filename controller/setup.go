@@ -30,6 +30,7 @@ func Setup() {
 	setupBooks()
 	setupCart()
 	setupOrder()
+	setupAdmin()
 
 	router.Run()
 }

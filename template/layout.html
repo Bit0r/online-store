@@ -11,8 +11,11 @@
 </head>
 
 <body class="container">
-    {{template "navbar"}}
-    {{template "content" .}}
+    {{template "navbar" .Sudo}}
+    {{template "content" .Data}}
+    {{with .Paging}}
+    {{template "pagination.html" .}}
+    {{end}}
 </body>
 
 </html>

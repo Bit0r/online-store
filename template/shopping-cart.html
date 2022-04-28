@@ -1,66 +1,68 @@
 {{define "content"}}
-<main class="section">
-    <form class="container" action="/order" method="post">
-        <table class="table is-striped is-hoverable is-fullwidth">
-            <thead>
-                <tr>
-                    <th>选取</th>
-                    <th>商品</th>
-                    <th>单价</th>
-                    <th>数量</th>
-                    <th>小计</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody onchange="calcTotal()">
-                {{range .CartBooks}}
-                <tr id="tr-{{.ID}}">
-                    <td><input type="checkbox" name="booksID" value="{{.ID}}"></td>
-                    <td>《{{.Name}}》{{.Author}}</td>
-                    <td>{{.Price}}</td>
-                    <td>
-                        <div class="control">
-                            <input class="input" type="number" value="{{.Quantity}}"
-                                onchange="update('{{.ID}}', this.value)" required min="1">
-                        </div>
-                    </td>
-                    <td>{{.Subtotal}}</td>
-                    <td><button class="button is-danger" onclick="update('{{.ID}}', 0)">删除</button></td>
-                </tr>
-                {{end}}
-            </tbody>
-        </table>
+<footer class="footer">
+    <main class="section">
+        <form class="container" action="/order" method="post">
+            <table class="table is-striped is-hoverable is-fullwidth">
+                <thead>
+                    <tr>
+                        <th>选取</th>
+                        <th>商品</th>
+                        <th>单价</th>
+                        <th>数量</th>
+                        <th>小计</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody onchange="calcTotal()">
+                    {{range .CartBooks}}
+                    <tr id="tr-{{.ID}}">
+                        <td><input type="checkbox" name="booksID" value="{{.ID}}"></td>
+                        <td>《{{.Name}}》{{.Author}}</td>
+                        <td>{{.Price}}</td>
+                        <td>
+                            <div class="control">
+                                <input class="input" type="number" value="{{.Quantity}}"
+                                    onchange="update('{{.ID}}', this.value)" required min="1">
+                            </div>
+                        </td>
+                        <td>{{.Subtotal}}</td>
+                        <td><button class="button is-danger" onclick="update('{{.ID}}', 0)">删除</button></td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
 
-        <div class="level">
-            <div class="level-left">
-                <div class="level-item">
-                    <label class="checkbox">
-                        全选
-                        <input type="checkbox" onchange="toggle(this.checked)">
-                    </label>
-                </div>
-                <div class="level-item">
-                    <div class="select">
-                        <select name="addressID" required>
-                            <option value="">选择收货地址</option>
-                            {{range .CartAddresses}}
-                            <option value="{{.ID}}">{{.Name}}——{{.Recipient}}, {{.Phone}}</option>
-                            {{end}}
-                        </select>
+            <div class="level">
+                <div class="level-left">
+                    <div class="level-item">
+                        <label class="checkbox">
+                            全选
+                            <input type="checkbox" onchange="toggle(this.checked)">
+                        </label>
+                    </div>
+                    <div class="level-item">
+                        <div class="select">
+                            <select name="addressID" required>
+                                <option value="">选择收货地址</option>
+                                {{range .CartAddresses}}
+                                <option value="{{.ID}}">{{.Name}}——{{.Recipient}}, {{.Phone}}</option>
+                                {{end}}
+                            </select>
+                        </div>
                     </div>
                 </div>
+                <div class="level-right">
+                    <p class="level-item">
+                        合计：￥<span id="total">0</span>
+                    </p>
+                    <p class="level-item">
+                        <button class="button is-link" type="submit">立即下单</button>
+                    </p>
+                </div>
             </div>
-            <div class="level-right">
-                <p class="level-item">
-                    合计：￥<span id="total">0</span>
-                </p>
-                <p class="level-item">
-                    <button class="button is-link" type="submit">立即下单</button>
-                </p>
-            </div>
-        </div>
-    </form>
-</main>
+        </form>
+    </main>
+</footer>
 <style>
     th:nth-child(4) {
         min-width: 5rem;
