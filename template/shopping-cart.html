@@ -77,12 +77,12 @@
         $loading = $tr.querySelector(quantity == 0 ? 'button' : '.control')
         $loading.classList.add('is-loading')
 
-        let formData = new FormData()
-        formData.set('id', id)
-        formData.set('quantity', quantity)
         let response = await fetch('book', {
             method: 'PUT',
-            body: formData
+            body: new URLSearchParams({
+                'id': id,
+                'quantity': quantity
+            })
         })
         $loading.classList.remove('is-loading')
         if (response.ok) {

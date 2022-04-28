@@ -49,12 +49,13 @@ func handleAddCart(ctx *gin.Context) {
 func handleUpdateCart(ctx *gin.Context) {
 	userID := sessions.Default(ctx).Get("userID").(uint64)
 	bookInfo := struct {
-		BookID   uint64
-		Quantity uint
+		BookID   uint64 `form:"id"`
+		Quantity uint   `form:"quantity"`
 	}{}
 	ctx.Bind(&bookInfo)
 	err := model.UpdateCartItem(userID, bookInfo.BookID, bookInfo.Quantity)
 	if err != nil {
+		log.Println(err)
 		ctx.Status(http.StatusInternalServerError)
 	}
 }

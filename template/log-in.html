@@ -50,7 +50,7 @@
 
         let response = await fetch('log-in', {
             method: 'POST',
-            body: new FormData($form)
+            body: new URLSearchParams(new FormData($form))
         })
         switch (response.status) {
             case 401:
@@ -58,7 +58,7 @@
                 break
             case 200:
                 alert('登录成功！')
-                location.pathname = '/'
+                location.replace('/')
                 break
         }
 

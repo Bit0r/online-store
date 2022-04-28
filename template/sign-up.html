@@ -85,12 +85,12 @@
         })
         let response = await fetch('', {
             method: 'POST',
-            body: new FormData($form)
+            body: new URLSearchParams(new FormData($form))
         })
 
         if (response.ok) {
             alert('注册成功')
-            location.pathname = '/'
+            location.replace('/')
         } else {
             alert('注册失败，用户名已被占用')
         }

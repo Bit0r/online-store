@@ -74,16 +74,16 @@
 <script>
     async function addCartItem($button, id) {
         $button.classList.add('is-loading')
-        let formData = new FormData()
-        formData.set('id', id)
         let response = await fetch(`/cart/book`, {
             method: 'POST',
-            body: formData
+            body: new URLSearchParams({
+                'id': id
+            })
         })
         switch (response.status) {
             case 401:
                 alert('请先登录')
-                location.pathname = '/log-in'
+                location.assign('/log-in')
                 break;
             case 200:
                 alert('添加成功')
