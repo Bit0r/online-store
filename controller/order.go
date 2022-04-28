@@ -9,12 +9,51 @@ import (
 	"github.com/Bit0r/online-store/model"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/samber/lo"
 )
 
 func setupOrder() {
-	router.GET("/order/:id", middleware.AuthUserRedirect)
-	router.POST("/order", handleAddOrder)
-	router.PUT("/order")
+	router.GET("/order/:id", middleware.AuthUserRedirect, handleGetOrder)
+	router.POST("/order", middleware.AuthUser, handleAddOrder)
+	router.PUT("/order", middleware.AuthUser, handleUpdateOrder)
+}
+
+func handleGetOrder(ctx *gin.Context) {
+	userID := ctx.GetUint64("userID")
+	orderID, _ := strconv.ParseUint(ctx.Param("id"), 0, 64)
+
+	// 获取订单信息
+	order, err := model.GetOrder(orderID, true)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	// 校验访问权限
+	isAdmin := model.HasPrivilege(userID, "order")
+	if order.UserID != userID && !isAdmin {
+		ctx.Status(http.StatusForbidden)
+		return
+	}
+
+	// 获取地址信息
+	address, _ := model.GetAddress(order.AddressID)
+
+	// 访问模板
+	ctx.Set("tpl_files", []string{"layout.html", "order.html", "navbar.html"})
+	i18n := map[string]string{
+		"unpaid":     "待付款",
+		"failed":     "失败",
+		"to_be_ship": "待发货",
+		"shipped":    "已发货，正在运输",
+		"success":    "成功",
+	}
+	ctx.Set("tpl_data", struct {
+		model.Order
+		Address  model.Address
+		IsAdmin  bool
+		StatusCN string
+	}{order, address, isAdmin, i18n[order.Status]})
 }
 
 func handleAddOrder(ctx *gin.Context) {
@@ -35,5 +74,57 @@ func handleAddOrder(ctx *gin.Context) {
 		ctx.Status(http.StatusInternalServerError)
 	} else {
 		ctx.Redirect(http.StatusSeeOther, "/order/"+strconv.Itoa(int(orderID)))
+	}
+}
+
+func handleUpdateOrder(ctx *gin.Context) {
+	userID := ctx.GetUint64("userID")
+
+	var orderForm struct {
+		ID     uint64 `form:"id"`
+		Status string `form:"status"`
+	}
+	ctx.Bind(&orderForm)
+	log.Println(orderForm.ID, orderForm.Status)
+	// 获取订单信息
+	order, err := model.GetOrder(orderForm.ID, false)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	// 校验访问权限
+	isAdmin := model.HasPrivilege(userID, "order")
+	if order.UserID != userID && !isAdmin {
+		ctx.Status(http.StatusForbidden)
+		return
+	}
+
+	// 校验状态转移的正确性
+	type edge struct {
+		// cur       string
+		next      string
+		needAdmin bool
+	}
+	dag := map[string][]edge{
+		"unpaid":     {{next: "to_be_ship"}, {next: "failed"}},
+		"to_be_ship": {{next: "failed", needAdmin: true}, {next: "shipped", needAdmin: true}},
+		"shipped":    {{next: "failed"}, {next: "success"}},
+		"success":    {},
+		"failed":     {},
+	}
+	success := lo.ContainsBy(dag[order.Status], func(e edge) bool {
+		return e.next == orderForm.Status &&
+			(!e.needAdmin || (e.needAdmin && isAdmin))
+	})
+	if !success {
+		ctx.Status(http.StatusConflict)
+	}
+
+	// 更新订单状态
+	err = model.UpdateOrderStatus(orderForm.ID, orderForm.Status)
+	if err != nil {
+		log.Println(err)
+		ctx.Status(http.StatusInternalServerError)
 	}
 }

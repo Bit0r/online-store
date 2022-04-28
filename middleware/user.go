@@ -9,8 +9,10 @@ import (
 
 func AuthUser(ctx *gin.Context) {
 	session := sessions.Default(ctx)
-	_, ok := session.Get("userID").(uint64)
-	if !ok {
+	userID, ok := session.Get("userID").(uint64)
+	if ok {
+		ctx.Set("userID", userID)
+	} else {
 		ctx.Status(http.StatusUnauthorized)
 		ctx.Abort()
 	}
@@ -18,8 +20,10 @@ func AuthUser(ctx *gin.Context) {
 
 func AuthUserRedirect(ctx *gin.Context) {
 	session := sessions.Default(ctx)
-	_, ok := session.Get("userID").(uint64)
-	if !ok {
+	userID, ok := session.Get("userID").(uint64)
+	if ok {
+		ctx.Set("userID", userID)
+	} else {
 		ctx.Redirect(http.StatusFound, "/user/log-in")
 		ctx.Abort()
 	}

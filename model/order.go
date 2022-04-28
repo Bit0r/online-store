@@ -9,6 +9,7 @@ import (
 
 type OrderItem struct {
 	Name     string
+	Image    string
 	Quantity uint
 	Price    float64
 	Subtotal float64
@@ -17,10 +18,12 @@ type OrderItem struct {
 type OrderItems = []OrderItem
 
 type Order struct {
-	ID     uint64
-	Total  float64
-	Status string
-	Items  OrderItems
+	ID        uint64
+	UserID    uint64
+	AddressID uint64
+	Total     float64
+	Status    string
+	Items     OrderItems
 	time.Time
 }
 
@@ -109,8 +112,34 @@ func GetOrders(userID, offset, row_count uint64) (orders Orders, err error) {
 	return
 }
 
+func GetOrder(id uint64, needItems bool) (order Order, err error) {
+	order.ID = id
+
+	query := `select user_id, order_time, total, status, address_id
+	from orders
+	where id = ?`
+	err = db.QueryRow(query, id).
+		Scan(&order.UserID, &order.Time, &order.Total, &order.Status, &order.AddressID)
+	if err != nil {
+		return
+	}
+
+	if needItems {
+		order.Items, err = GetOrderItems(id)
+	}
+	return
+}
+
+func UpdateOrderStatus(id uint64, status string) (err error) {
+	query := `update orders
+	set status = ?
+	where id = ?`
+	_, err = db.Exec(query, status, id)
+	return
+}
+
 func GetOrderItems(orderID uint64) (orderItems OrderItems, err error) {
-	query := `select name, quantity, order_item.price, subtotal
+	query := `select name, coalesce(image, ''), quantity, order_item.price, subtotal
 	from order_item, book
 	where book_id = book.id and order_id = ?`
 	rs, err := db.Query(query, orderID)
@@ -120,7 +149,7 @@ func GetOrderItems(orderID uint64) (orderItems OrderItems, err error) {
 
 	var orderItem OrderItem
 	for rs.Next() {
-		err := rs.Scan(&orderItem.Name, &orderItem.Quantity, &orderItem.Price, &orderItem.Subtotal)
+		err := rs.Scan(&orderItem.Name, &orderItem.Image, &orderItem.Quantity, &orderItem.Price, &orderItem.Subtotal)
 		if err != nil {
 			log.Println(err)
 		} else {
