@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/Bit0r/online-store/middleware"
@@ -14,6 +15,7 @@ func setupUser() {
 	userGroup.Any("/log-in", handleLogin)
 	userGroup.Any("/sign-up", handleSignUp)
 	userGroup.GET("/orders", middleware.AuthUserRedirect, getOrders(false))
+	userGroup.GET("/log-out", middleware.AuthUser, handleLogout)
 }
 
 func handleLogin(ctx *gin.Context) {
@@ -47,5 +49,18 @@ func handleSignUp(ctx *gin.Context) {
 		} else {
 			ctx.Status(http.StatusUnauthorized)
 		}
+	}
+}
+
+func handleLogout(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+	session.Clear()
+	session.Options(sessions.Options{MaxAge: -1})
+	err := session.Save()
+	if err == nil {
+		ctx.Redirect(http.StatusFound, "/")
+	} else {
+		log.Println(err)
+		ctx.Status(http.StatusInternalServerError)
 	}
 }
