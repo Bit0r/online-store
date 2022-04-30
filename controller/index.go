@@ -11,25 +11,37 @@ func setupBooks() {
 	router.GET("/index/*category", func(ctx *gin.Context) {
 		var step uint64 = 12
 		data := struct {
+			IsAdmin    bool
 			Category   string
 			Categories []string
 			model.Books
 		}{}
+
+		userID, ok := sessions.Default(ctx).Get("userID").(uint64)
+		if ok && model.HasPrivilege(userID, "book") {
+			data.IsAdmin = true
+		}
 
 		// 填充过滤信息
 		data.Category = ctx.Param("category")[1:]
 		data.Categories = model.GetCategories()
 		info := ctx.Query("info")
 
+		// 填充过滤器
+		filter := model.BooksFilter{
+			Category:   data.Category,
+			Info:       info,
+			MustExists: !data.IsAdmin,
+		}
+
 		// 填充分页信息
 		paging := ctx.MustGet("paging").(middleware.Paging)
-		paging.Total = model.CountBooks(data.Category, info)/step + 1
+		paging.Total = model.CountBooks(filter)/step + 1
 		ctx.Set("paging", paging)
 
 		// 填充图书信息
 		data.Books, _ = model.GetBooks(
-			data.Category,
-			info,
+			filter,
 			uint64((paging.Cur-1)*step),
 			uint64(step))
 		ctx.Set("tpl_data", data)

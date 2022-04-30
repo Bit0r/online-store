@@ -5,11 +5,19 @@ import (
 )
 
 type Book struct {
-	ID           uint64
+	ID           uint64 // 数据库自增id，添加图书时不用填写
 	ISBN         string
+	Image        string
 	Name, Author string
 	Price        float64
 	Intro        string
+	Deleted      bool
+}
+
+type BooksFilter struct {
+	Category   string
+	Info       string
+	MustExists bool
 }
 
 type Books = []Book
@@ -33,9 +41,8 @@ func GetCategories() (names []string) {
 	return
 }
 
-func GetBooks(category, info string, offset, count uint64) (rows Books, err error) {
-	query, args := consBookQuery("id,isbn,book.name,author,price,intro",
-		category, info)
+func GetBooks(filter BooksFilter, offset, count uint64) (rows Books, err error) {
+	query, args := consBookQuery("id,isbn,book.name,author,price,intro,deleted", filter)
 
 	query += " limit ?, ?"
 	args = append(args, offset, count)
@@ -49,7 +56,7 @@ func GetBooks(category, info string, offset, count uint64) (rows Books, err erro
 	book := Book{}
 
 	for rs.Next() {
-		err := rs.Scan(&book.ID, &book.ISBN, &book.Name, &book.Author, &book.Price, &book.Intro)
+		err := rs.Scan(&book.ID, &book.ISBN, &book.Name, &book.Author, &book.Price, &book.Intro, &book.Deleted)
 		if err != nil {
 			log.Fatal(err)
 		} else {
@@ -60,30 +67,39 @@ func GetBooks(category, info string, offset, count uint64) (rows Books, err erro
 	return
 }
 
-func CountBooks(category, info string) (count uint64) {
-	query, args := consBookQuery("count(*)", category, info)
+func CountBooks(filter BooksFilter) (count uint64) {
+	query, args := consBookQuery("count(*)", filter)
 	db.QueryRow(query, args...).Scan(&count)
 	return
 }
 
-func consBookQuery(cols, category, info string) (query string, args []any) {
+func consBookQuery(cols string, filter BooksFilter) (query string, args []any) {
 	query = "select " + cols
 
-	if category == "" {
+	if category := filter.Category; category == "" {
 		query += ` from book
-		where not deleted`
+		where true`
 	} else {
 		query += ` from book, category
 		where id = category.book_id
-			and category.name = ?
-			and not deleted`
+			and category.name = ?`
 		args = append(args, category)
 	}
 
-	if info != "" {
+	if filter.MustExists {
+		query += " and not deleted"
+	}
+
+	if info := filter.Info; info != "" {
 		query += " and (isbn = ? or book.name like ? or author like ?)"
 		args = append(args, info, "%"+info+"%", "%"+info+"%")
 	}
 
+	query += " order by id desc"
+
 	return
+}
+
+func AddBook(book Book) {
+
 }

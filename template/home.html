@@ -1,6 +1,6 @@
 {{define "content"}}
 <div class="columns">
-    <aside class="menu column is-2">
+    <aside class="menu column is-narrow">
         <p class="menu-label">
             图书类别
         </p>
@@ -11,7 +11,7 @@
             {{end}}
         </ul>
     </aside>
-    <main class="column is-8">
+    <main class="column">
         <form action="" method="get" class="columns is-centered">
             <div class="field has-addons column is-two-fifths">
                 <div class="control">
@@ -31,21 +31,33 @@
                     </figure>
                 </div>
                 <div class="card-content">
-                    <p class="is-size-5 has-text-weight-bold"> {{.Name}} </p>
+                    <p>
+                        <span class="is-size-5 has-text-weight-bold">
+                            {{.Name}}
+                        </span>
+                        {{if .Deleted}}
+                        <span class="tag is-warning">无货</span>
+                        {{end}}
+                    </p>
                     <p> {{.Author}} </p>
                     <p> ￥{{.Price}} </p>
                 </div>
                 <footer class="card-footer">
-                    <button class="card-footer-item modal-trigger button" data-target="modal-{{.ID}}">详情</button>
+                    <button class="card-footer-item modal-trigger button" data-target="modal-{{.ID}}">
+                        <span class="icon is-small">
+                            <i class="fas fa-book"></i>
+                            <span>详情</span>
+                        </span>
+                    </button>
                     <button onclick="addCartItem(this, '{{.ID}}')" class="card-footer-item button">
                         <span class="icon is-small">
-                            <i class="fas fa-shopping-cart"></i>
+                            <i class="fas fa-cart-plus"></i>
+                            <span>添加</span>
                         </span>
                     </button>
                 </footer>
             </div>
             <div class="modal" id="modal-{{.ID}}">
-                <p>查看介绍</p>
                 <div class="modal-background"></div>
                 <div class="modal-card">
                     <header class="modal-card-head">
@@ -57,6 +69,12 @@
                         <p> ISBN: {{.ISBN}} </p>
                         <p class="content"> {{.Intro}} </p>
                     </section>
+                    {{if $.IsAdmin}}
+                    <footer class="modal-card-foot">
+                        <a class="button is-link" href="/book/update/{{.ID}}">编辑</a>
+                        <button class="button">取消</button>
+                    </footer>
+                    {{end}}
                 </div>
             </div>
             {{end}}
