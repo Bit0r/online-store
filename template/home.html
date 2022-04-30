@@ -12,7 +12,7 @@
         </ul>
     </aside>
     <main class="column is-8">
-        <form action="./" method="get" class="columns is-centered">
+        <form action="" method="get" class="columns is-centered">
             <div class="field has-addons column is-two-fifths">
                 <div class="control">
                     <input class="input" type="search" name="info" placeholder="搜索ISBN/书名/作者">
@@ -21,7 +21,6 @@
                     <button type="submit" class="button is-info">搜索</button>
                 </div>
             </div>
-            <input type="hidden" name="category" value="{{.Category}}">
         </form>
         <div class="columns row is-multiline">
             {{range .Books}}
@@ -66,6 +65,7 @@
 </div>
 
 <script>
+    // document.forms[0].action = location.href
     async function addCartItem($button, id) {
         $button.classList.add('is-loading')
         let response = await fetch(`/cart/book`, {

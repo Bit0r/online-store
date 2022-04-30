@@ -16,17 +16,22 @@ func setupBooks() {
 			model.Books
 		}{}
 
-		// 填充类别信息
+		// 填充过滤信息
 		data.Category = ctx.Param("category")[1:]
 		data.Categories = model.GetCategories()
+		info := ctx.Query("info")
 
 		// 填充分页信息
 		paging := ctx.MustGet("paging").(middleware.Paging)
-		paging.Total = model.CountBooks(data.Category)/step + 1
+		paging.Total = model.CountBooks(data.Category, info)/step + 1
 		ctx.Set("paging", paging)
 
 		// 填充图书信息
-		data.Books = model.GetBooks(data.Category, uint64((paging.Cur-1)*step), uint64(step))
+		data.Books, _ = model.GetBooks(
+			data.Category,
+			info,
+			uint64((paging.Cur-1)*step),
+			uint64(step))
 		ctx.Set("tpl_data", data)
 
 		// 设置模板

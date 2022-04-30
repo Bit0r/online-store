@@ -1,7 +1,6 @@
 package model
 
 import (
-	"database/sql"
 	"log"
 )
 
@@ -34,35 +33,17 @@ func GetCategories() (names []string) {
 	return
 }
 
-func GetBooks(category string, offset, row_count uint64) (rows Books) {
-	var query string
-	var rs *sql.Rows
+func GetBooks(category, info string, offset, count uint64) (rows Books, err error) {
+	query, args := consBookQuery("id,isbn,book.name,author,price,intro",
+		category, info)
 
-	// query := "select id, isbn, name, author, price, intro"
-	info := ""
-	switch {
-	case category == "" && info == "":
-		query = `select id, isbn, name, author, price, intro
-		from book
-		where not deleted
-		limit ?, ?`
-		rs, _ = db.Query(query, offset, row_count)
-	case category != "" && info == "":
-		query = `select id, isbn, book.name, author, price, intro
-		from book, category
-		where id = category.book_id
-			and category.name = ?
-			and not deleted
-		limit ?, ?`
-		rs, _ = db.Query(query, category, offset, row_count)
-	case category == "" && info != "":
-		query = `select id, isbn, name, author, price, intro
-		from book
-		where not deleted and (isbn = ? or name regex ? or author regex ?)
-		limit ?, ?`
-		rs, _ = db.Query(query, offset, row_count)
+	query += " limit ?, ?"
+	args = append(args, offset, count)
+
+	rs, err := db.Query(query, args...)
+	if err != nil {
+		return nil, err
 	}
-
 	defer rs.Close()
 
 	book := Book{}
@@ -79,20 +60,30 @@ func GetBooks(category string, offset, row_count uint64) (rows Books) {
 	return
 }
 
-func CountBooks(category string) (count uint64) {
-	var query string
+func CountBooks(category, info string) (count uint64) {
+	query, args := consBookQuery("count(*)", category, info)
+	db.QueryRow(query, args...).Scan(&count)
+	return
+}
+
+func consBookQuery(cols, category, info string) (query string, args []any) {
+	query = "select " + cols
+
 	if category == "" {
-		query = `select count(*)
-		from book
+		query += ` from book
 		where not deleted`
-		db.QueryRow(query).Scan(&count)
 	} else {
-		query = `select count(*)
-		from book, category
+		query += ` from book, category
 		where id = category.book_id
 			and category.name = ?
 			and not deleted`
-		db.QueryRow(query, category).Scan(&count)
+		args = append(args, category)
 	}
+
+	if info != "" {
+		query += " and (isbn = ? or book.name like ? or author like ?)"
+		args = append(args, info, "%"+info+"%", "%"+info+"%")
+	}
+
 	return
 }
