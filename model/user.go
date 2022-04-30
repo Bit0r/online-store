@@ -65,7 +65,7 @@ func GetPrivileges(userID uint64) ([]string, error) {
 func HasPrivilege(userID uint64, privilege string) bool {
 	query := `select true
 	from user_privilege
-	where user_id = ? and privilege = ?`
+	where user_id = ? and (privilege = ? or privilege = 'all')`
 
 	flag := false
 	db.QueryRow(query, userID, privilege).Scan(&flag)
