@@ -83,7 +83,7 @@ func handleGetOrder(ctx *gin.Context) {
 
 	ctx.Set("tpl_data", struct {
 		model.Order
-		Address  model.Address
+		model.Address
 		IsAdmin  bool
 		StatusCN string
 	}{order, address, isAdmin, statusI18n[order.Status]})
