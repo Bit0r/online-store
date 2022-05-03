@@ -9,7 +9,7 @@ import (
 
 type OrderItem struct {
 	Name     string
-	Image    string
+	Cover    string
 	Quantity uint
 	Price    float64
 	Subtotal float64
@@ -144,7 +144,7 @@ func UpdateOrderStatus(id uint64, status string) (err error) {
 }
 
 func GetOrderItems(orderID uint64) (orderItems OrderItems, err error) {
-	query := `select name, coalesce(image, ''), quantity, order_item.price, subtotal
+	query := `select name, coalesce(cover, ''), quantity, order_item.price, subtotal
 	from order_item, book
 	where book_id = book.id and order_id = ?`
 	rs, err := db.Query(query, orderID)
@@ -154,7 +154,7 @@ func GetOrderItems(orderID uint64) (orderItems OrderItems, err error) {
 
 	var orderItem OrderItem
 	for rs.Next() {
-		err := rs.Scan(&orderItem.Name, &orderItem.Image, &orderItem.Quantity, &orderItem.Price, &orderItem.Subtotal)
+		err := rs.Scan(&orderItem.Name, &orderItem.Cover, &orderItem.Quantity, &orderItem.Price, &orderItem.Subtotal)
 		if err != nil {
 			log.Println(err)
 		} else {

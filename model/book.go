@@ -7,7 +7,7 @@ import (
 type Book struct {
 	ID           uint64 // 数据库自增id，添加图书时不用填写
 	ISBN         string
-	Image        string
+	Cover        string
 	Name, Author string
 	Price        float64
 	Intro        string
@@ -35,6 +35,26 @@ func GetCategories() (names []string) {
 			log.Fatal(err)
 		} else {
 			names = append(names, name)
+		}
+	}
+
+	return
+}
+
+func GetBookCategories(id uint64) (categories []string) {
+	query := `select name
+	from category
+	where book_id = ?`
+	rs, _ := db.Query(query, id)
+	defer rs.Close()
+
+	var name string
+	for rs.Next() {
+		err := rs.Scan(&name)
+		if err != nil {
+			log.Fatal(err)
+		} else {
+			categories = append(categories, name)
 		}
 	}
 
@@ -97,6 +117,14 @@ func consBookQuery(cols string, filter BooksFilter) (query string, args []any) {
 
 	query += " order by id desc"
 
+	return
+}
+
+func GetBook(id uint64) (book Book, err error) {
+	query := `select id, isbn, name, author, coalesce(cover, ''), price, intro, deleted
+	from book
+	where id = ?`
+	err = db.QueryRow(query, id).Scan(&book.ID, &book.ISBN, &book.Name, &book.Author, &book.Cover, &book.Price, &book.Intro, &book.Deleted)
 	return
 }
 

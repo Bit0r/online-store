@@ -46,14 +46,14 @@
                     <button class="card-footer-item modal-trigger button" data-target="modal-{{.ID}}">
                         <span class="icon is-small">
                             <i class="fas fa-book"></i>
-                            <span>详情</span>
                         </span>
+                        <span>详情</span>
                     </button>
                     <button onclick="addCartItem(this, '{{.ID}}')" class="card-footer-item button">
                         <span class="icon is-small">
                             <i class="fas fa-cart-plus"></i>
-                            <span>添加</span>
                         </span>
+                        <span>添加</span>
                     </button>
                 </footer>
             </div>
@@ -71,7 +71,7 @@
                     </section>
                     {{if $.IsAdmin}}
                     <footer class="modal-card-foot">
-                        <a class="button is-link" href="/book/update/{{.ID}}">编辑</a>
+                        <a class="button is-link" href="/book/edit/{{.ID}}">编辑</a>
                         <button class="button">取消</button>
                     </footer>
                     {{end}}
