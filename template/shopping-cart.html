@@ -114,7 +114,7 @@
                 $tr.classList.remove('is-selected')
             }
         }
-        $total.textContent = String(total)
+        $total.textContent = total.toFixed(2)
     }
 
     document.forms[0].addEventListener('submit', ev => {

@@ -11,7 +11,7 @@
 </head>
 
 <body class="container">
-    {{template "navbar" .Sudo}}
+    {{template "navbar" .}}
     {{template "content" .Data}}
     {{with .Paging}}
     {{template "pagination.html" .}}

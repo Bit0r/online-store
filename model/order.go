@@ -9,7 +9,7 @@ import (
 
 type OrderItem struct {
 	Name     string
-	Cover    string
+	Cover    sql.NullString
 	Quantity uint
 	Price    float64
 	Subtotal float64
@@ -144,7 +144,7 @@ func UpdateOrderStatus(id uint64, status string) (err error) {
 }
 
 func GetOrderItems(orderID uint64) (orderItems OrderItems, err error) {
-	query := `select name, coalesce(cover, ''), quantity, order_item.price, subtotal
+	query := `select name, cover, quantity, order_item.price, subtotal
 	from order_item, book
 	where book_id = book.id and order_id = ?`
 	rs, err := db.Query(query, orderID)
