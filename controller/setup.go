@@ -10,7 +10,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var router = gin.Default()
+var (
+	router    = gin.Default()
+	uploadDir = conf.Get("website", "online_store_website", "upload_dir").(string)
+)
 
 func Setup() {
 	store, _ := redis.NewStore(10, "tcp", "localhost:6379", "", []byte("Ju8AbyXfnjoMktzh"))
@@ -21,9 +24,8 @@ func Setup() {
 		sessions.Sessions("gin-session", store),
 	)
 
-	uploads := conf.Get("website", "online_store_website", "upload_dir").(string)
 	router.Static("/js", "js/")
-	router.Static("/cover", uploads+"/images/")
+	router.Static("/cover", uploadDir+"/cover/")
 
 	router.GET("/", func(ctx *gin.Context) {
 		ctx.Redirect(http.StatusFound, "/index")
