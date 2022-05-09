@@ -22,6 +22,7 @@ func Setup() {
 		middleware.TemplateExecute,
 		middleware.Pagination,
 		sessions.Sessions("gin-session", store),
+		middleware.SetupPrivileges,
 	)
 
 	router.Static("/js", "js/")

@@ -7,7 +7,7 @@ import (
 
 	"github.com/Bit0r/online-store/middleware"
 	"github.com/Bit0r/online-store/model"
-	"github.com/gin-contrib/sessions"
+	"github.com/Bit0r/online-store/model/perm"
 	"github.com/gin-gonic/gin"
 	"github.com/samber/lo"
 )
@@ -29,7 +29,7 @@ func setupOrder() {
 func getOrders(needAdmin bool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		userID := ctx.GetUint64("userID")
-		isAdmin := model.HasPrivilege(userID, "order")
+		isAdmin := ctx.MustGet("privileges").(perm.PrivilegeSet).HasPrivilege("order")
 
 		var orders model.Orders
 		switch {
@@ -69,7 +69,7 @@ func handleGetOrder(ctx *gin.Context) {
 	}
 
 	// 校验访问权限
-	isAdmin := model.HasPrivilege(userID, "order")
+	isAdmin := ctx.MustGet("privileges").(perm.PrivilegeSet).HasPrivilege("order")
 	if order.UserID != userID && !isAdmin {
 		ctx.Status(http.StatusForbidden)
 		return
@@ -90,8 +90,7 @@ func handleGetOrder(ctx *gin.Context) {
 }
 
 func handleAddOrder(ctx *gin.Context) {
-	session := sessions.Default(ctx)
-	userID, _ := session.Get("userID").(uint64)
+	userID := ctx.GetUint64("userID")
 
 	addressID, _ := strconv.Atoi(ctx.PostForm("addressID"))
 
@@ -127,7 +126,7 @@ func handleUpdateOrder(ctx *gin.Context) {
 	}
 
 	// 校验访问权限
-	isAdmin := model.HasPrivilege(userID, "order")
+	isAdmin := ctx.MustGet("privileges").(perm.PrivilegeSet).HasPrivilege("order")
 	if order.UserID != userID && !isAdmin {
 		ctx.Status(http.StatusForbidden)
 		return

@@ -3,7 +3,7 @@ package controller
 import (
 	"github.com/Bit0r/online-store/middleware"
 	"github.com/Bit0r/online-store/model"
-	"github.com/gin-contrib/sessions"
+	"github.com/Bit0r/online-store/model/perm"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,8 +17,8 @@ func setupBooks() {
 			model.Books
 		}{}
 
-		userID, ok := sessions.Default(ctx).Get("userID").(uint64)
-		if ok && model.HasPrivilege(userID, "book") {
+		privileges, ok := ctx.Get("privileges")
+		if ok && privileges.(perm.PrivilegeSet).HasPrivilege("book") {
 			data.IsAdmin = true
 		}
 
@@ -48,7 +48,7 @@ func setupBooks() {
 
 		// 设置模板
 		files := []string{"layout.html", "home.html", "navbar-guest.html"}
-		if sessions.Default(ctx).Get("userID") != nil {
+		if ctx.GetBool("isLogged") {
 			files[2] = "navbar.html"
 		}
 		ctx.Set("tpl_files", files)

@@ -1,12 +1,10 @@
 package controller
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/Bit0r/online-store/middleware"
 	"github.com/Bit0r/online-store/model"
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,9 +24,7 @@ func handleLogin(ctx *gin.Context) {
 	case http.MethodPost:
 		id := model.VerifyUser(ctx.PostForm("name"), ctx.PostForm("passwd"))
 		if id != 0 {
-			session := sessions.Default(ctx)
-			session.Set("userID", id)
-			session.Save()
+			middleware.LogIn(ctx, id)
 		} else {
 			ctx.Status(http.StatusUnauthorized)
 		}
@@ -43,9 +39,7 @@ func handleSignUp(ctx *gin.Context) {
 	case http.MethodPost:
 		id := model.AddUser(ctx.PostForm("name"), ctx.PostForm("passwd"))
 		if id != 0 {
-			session := sessions.Default(ctx)
-			session.Set("userID", id)
-			session.Save()
+			middleware.LogIn(ctx, id)
 		} else {
 			ctx.Status(http.StatusUnauthorized)
 		}
@@ -53,14 +47,5 @@ func handleSignUp(ctx *gin.Context) {
 }
 
 func handleLogout(ctx *gin.Context) {
-	session := sessions.Default(ctx)
-	session.Clear()
-	session.Options(sessions.Options{MaxAge: -1})
-	err := session.Save()
-	if err == nil {
-		ctx.Redirect(http.StatusFound, "/")
-	} else {
-		log.Println(err)
-		ctx.Status(http.StatusInternalServerError)
-	}
+	middleware.LogOut(ctx)
 }

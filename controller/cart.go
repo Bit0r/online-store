@@ -7,7 +7,6 @@ import (
 
 	"github.com/Bit0r/online-store/middleware"
 	"github.com/Bit0r/online-store/model"
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,7 +18,7 @@ func setupCart() {
 }
 
 func handleShowCart(ctx *gin.Context) {
-	id, _ := sessions.Default(ctx).Get("userID").(uint64)
+	id := ctx.GetUint64("userID")
 
 	files := []string{"layout.html", "navbar.html", "shopping-cart.html"}
 
@@ -35,8 +34,7 @@ func handleShowCart(ctx *gin.Context) {
 }
 
 func handleAddCart(ctx *gin.Context) {
-	session := sessions.Default(ctx)
-	id, _ := session.Get("userID").(uint64)
+	id := ctx.GetUint64("userID")
 
 	bookID, _ := strconv.ParseUint(ctx.PostForm("id"), 0, 64)
 	err := model.AddCartItem(id, bookID)
@@ -47,7 +45,7 @@ func handleAddCart(ctx *gin.Context) {
 }
 
 func handleUpdateCart(ctx *gin.Context) {
-	userID := sessions.Default(ctx).Get("userID").(uint64)
+	userID := ctx.GetUint64("userID")
 	bookInfo := struct {
 		BookID   uint64 `form:"id"`
 		Quantity uint   `form:"quantity"`

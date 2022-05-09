@@ -4,6 +4,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/Bit0r/online-store/model/perm"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -60,6 +61,14 @@ func GetPrivileges(userID uint64) ([]string, error) {
 	}
 
 	return privileges, nil
+}
+
+func GetPrivilegeSet(userID uint64) (perm.PrivilegeSet, error) {
+	privileges, err := GetPrivileges(userID)
+	if err != nil {
+		return 0, err
+	}
+	return perm.NewByStr(privileges...), nil
 }
 
 func HasPrivilege(userID uint64, privilege string) bool {

@@ -1,39 +1,46 @@
 package middleware
 
 import (
+	"log"
 	"net/http"
 
-	"github.com/Bit0r/online-store/model"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
 func AuthUser(ctx *gin.Context) {
-	session := sessions.Default(ctx)
-	userID, ok := session.Get("userID").(uint64)
-	if ok {
-		ctx.Set("userID", userID)
-	} else {
+	if !isLogged(ctx) {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 	}
 }
 
 func AuthUserRedirect(ctx *gin.Context) {
-	session := sessions.Default(ctx)
-	userID, ok := session.Get("userID").(uint64)
-	if ok {
-		ctx.Set("userID", userID)
-	} else {
+	if !isLogged(ctx) {
 		ctx.Redirect(http.StatusFound, "/user/log-in")
 		ctx.Abort()
 	}
 }
 
-func Permission(privilege string) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		userID := ctx.GetUint64("userID")
-		if !model.HasPrivilege(userID, privilege) {
-			ctx.AbortWithStatus(http.StatusForbidden)
-		}
+func isLogged(ctx *gin.Context) bool {
+	_, ok := ctx.Get("userID")
+	return ok
+}
+
+func LogIn(ctx *gin.Context, userID uint64) {
+	session := sessions.Default(ctx)
+	session.Set("userID", userID)
+	session.Save()
+}
+
+func LogOut(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+	session.Clear()
+	session.Options(sessions.Options{MaxAge: -1})
+	err := session.Save()
+	if err == nil {
+		ctx.Redirect(http.StatusFound, "/")
+	} else {
+		log.Println(err)
+		ctx.Status(http.StatusInternalServerError)
 	}
 }
