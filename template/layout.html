@@ -1,3 +1,4 @@
+{{define "layout"}}
 <html lang="zh-CN">
 
 <head>
@@ -10,7 +11,7 @@
     <script defer src="/js/navbar.js"></script>
 </head>
 
-<body class="container">
+<body>
     {{template "navbar" .}}
     {{template "content" .Data}}
     {{with .Paging}}
@@ -18,4 +19,12 @@
     {{end}}
 </body>
 
+<style>
+    body {
+        margin: auto;
+        max-width: 95vw;
+    }
+</style>
+
 </html>
+{{end}}

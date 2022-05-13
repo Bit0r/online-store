@@ -8,6 +8,7 @@ import (
 	"github.com/Bit0r/online-store/middleware"
 	"github.com/Bit0r/online-store/model"
 	"github.com/Bit0r/online-store/model/perm"
+	"github.com/Bit0r/online-store/view"
 	"github.com/gin-gonic/gin"
 	"github.com/samber/lo"
 )
@@ -48,10 +49,12 @@ func getOrders(needAdmin bool) gin.HandlerFunc {
 		ctx.Set("tpl_files", []string{"layout.html", "navbar.html", "orders.html"})
 		ctx.Set("tpl_data", orders)
 		if isAdmin && !needAdmin {
-			ctx.Set("sudo", "/admin/orders")
+			ctx.Set("buttons",
+				append(ctx.MustGet("buttons").(view.Buttons),
+					view.Button{Text: "所有订单", URL: "/admin/orders", Class: "is-danger"}))
 		}
 
-		paging, _ := ctx.MustGet("paging").(middleware.Paging)
+		paging, _ := ctx.MustGet("paging").(view.Paging)
 		paging.Total = 1
 		ctx.Set("paging", paging)
 	}

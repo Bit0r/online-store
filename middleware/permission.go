@@ -12,7 +12,7 @@ import (
 
 func SetupPrivileges(ctx *gin.Context) {
 	userID, ok := sessions.Default(ctx).Get("userID").(uint64)
-	ctx.Set("isLogged", ok)
+	ctx.Set("isLoggedIn", ok)
 	if !ok {
 		return
 	}

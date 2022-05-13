@@ -18,6 +18,7 @@
                 首页
             </a>
 
+            {{if .IsLoggedIn}}
             <a href="/cart/books" class="navbar-item">
                 购物车
             </a>
@@ -25,6 +26,7 @@
             <a href="/user/orders" class="navbar-item">
                 订单
             </a>
+            {{end}}
 
             <div class="navbar-item has-dropdown is-hoverable">
                 <a class="navbar-link">
@@ -46,14 +48,23 @@
     <div class="navbar-end">
         <div class="navbar-item">
             <div class="buttons">
-                {{with .Sudo}}
-                <a href="{{.}}" class="button is-danger">
-                    <strong>管理员模式</strong>
+                {{range .Buttons}}
+                <a href="{{.URL}}" class="button {{.Class}}">
+                    {{.Text}}
                 </a>
                 {{end}}
+                {{if .IsLoggedIn}}
                 <a href="/user/log-out" class="button is-light is-primary">
                     安全登出
                 </a>
+                {{else}}
+                <a href="/user/sign-up" class="button is-primary">
+                    <strong>注册</strong>
+                </a>
+                <a href="/user/log-in" class="button is-light">
+                    登录
+                </a>
+                {{end}}
             </div>
         </div>
     </div>

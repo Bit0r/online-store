@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"github.com/Bit0r/online-store/middleware"
 	"github.com/Bit0r/online-store/model"
 	"github.com/Bit0r/online-store/model/perm"
+	"github.com/Bit0r/online-store/view"
 	"github.com/gin-gonic/gin"
 )
 
@@ -35,7 +35,7 @@ func setupBooks() {
 		}
 
 		// 填充分页信息
-		paging := ctx.MustGet("paging").(middleware.Paging)
+		paging := ctx.MustGet("paging").(view.Paging)
 		paging.Total = model.CountBooks(filter)/step + 1
 		ctx.Set("paging", paging)
 
@@ -47,10 +47,7 @@ func setupBooks() {
 		ctx.Set("tpl_data", data)
 
 		// 设置模板
-		files := []string{"layout.html", "home.html", "navbar-guest.html"}
-		if ctx.GetBool("isLogged") {
-			files[2] = "navbar.html"
-		}
+		files := []string{"layout.html", "home.html", "navbar.html"}
 		ctx.Set("tpl_files", files)
 	})
 }

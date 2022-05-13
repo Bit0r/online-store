@@ -5,6 +5,7 @@ import (
 
 	"github.com/Bit0r/online-store/conf"
 	"github.com/Bit0r/online-store/middleware"
+	"github.com/Bit0r/online-store/view"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
@@ -19,8 +20,8 @@ func Setup() {
 	store, _ := redis.NewStore(10, "tcp", "localhost:6379", "", []byte("Ju8AbyXfnjoMktzh"))
 
 	router.Use(
-		middleware.TemplateExecute,
-		middleware.Pagination,
+		view.TemplateExecute,
+		view.Pagination,
 		sessions.Sessions("gin-session", store),
 		middleware.SetupPrivileges,
 	)
