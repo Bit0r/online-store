@@ -98,3 +98,10 @@ func UpdateAddress(address Address) (err error) {
 		address.ID)
 	return
 }
+
+func DeleteAddress(id uint64) (err error) {
+	query := `delete from address
+			where id = ?`
+	_, err = db.Exec(query, id)
+	return
+}

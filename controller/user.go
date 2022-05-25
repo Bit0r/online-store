@@ -15,9 +15,12 @@ func setupUser() {
 	userGroup.Any("/sign-up", handleSignUp)
 	userGroup.GET("/orders", middleware.AuthUserRedirect, getOrders(false))
 	userGroup.GET("/log-out", middleware.AuthUser, handleLogout)
-	userGroup.GET("/address", middleware.AuthUserRedirect, services.GetAddresses)
-	userGroup.GET("/address/:id", middleware.AuthUserRedirect, services.EditAddress)
-	userGroup.POST("/address", middleware.AuthUserRedirect, services.ReplaceAddress)
+
+	addressGroup := userGroup.Group("/address")
+	addressGroup.GET("/", middleware.AuthUserRedirect, services.GetAddresses)
+	addressGroup.POST("/", middleware.AuthUserRedirect, services.ReplaceAddress)
+	addressGroup.GET("/:id", middleware.AuthUserRedirect, services.EditAddress)
+	addressGroup.DELETE("/:id", middleware.AuthUser, services.DeleteAddress)
 }
 
 func handleLogin(ctx *gin.Context) {

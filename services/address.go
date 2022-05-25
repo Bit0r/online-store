@@ -76,15 +76,39 @@ func ReplaceAddress(ctx *gin.Context) {
 		return
 	}
 
-	// 如果是更新地址，则需要查询数据库
-	addressOld, err := model.GetAddress(address.ID)
-	if err != nil || addressOld.UserID != address.UserID {
+	if !hasAddress(address.UserID, address.ID) {
 		// 如果地址不存在或者不属于当前用户，则返回错误
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
 
 	err = model.UpdateAddress(address)
+	if err != nil {
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+	ctx.Redirect(http.StatusSeeOther, "/user/address")
+}
+
+func hasAddress(userID, addressID uint64) bool {
+	address, err := model.GetAddress(addressID)
+	return err == nil && address.UserID == userID
+}
+
+func DeleteAddress(ctx *gin.Context) {
+	id, err := strconv.ParseUint(ctx.Param("id"), 0, 64)
+	if err != nil {
+		ctx.Status(http.StatusBadRequest)
+		return
+	}
+
+	if !hasAddress(ctx.GetUint64("userID"), id) {
+		// 如果地址不存在或者不属于当前用户，则返回错误
+		ctx.Status(http.StatusBadRequest)
+		return
+	}
+
+	err = model.DeleteAddress(id)
 	if err != nil {
 		ctx.Status(http.StatusInternalServerError)
 		return
