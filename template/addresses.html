@@ -1,0 +1,52 @@
+{{define "content"}}
+<div class="section">
+    <article class="message is-info">
+        <div class="message-body">
+            <span class="icon">
+                <i class="fas fa-info-circle"></i>
+            </span>
+            <span>已保存了{{.Used}}条地址，还能保存{{.Free}}条数据。</span>
+        </div>
+    </article>
+    <table class="table is-bordered is-hoverable is-fullwidth">
+        <thead>
+            <tr>
+                <th>收货人</th>
+                <th>电话号码</th>
+                <th>省</th>
+                <th>市</th>
+                <th>县</th>
+                <th>乡</th>
+                <th>详细地址</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Addresses}}
+            <tr>
+                <td>{{.Consignee}}</td>
+                <td>{{.Phone}}</td>
+                <td>{{.Province}}</td>
+                <td>{{.City}}</td>
+                <td>{{.County}}</td>
+                <td>{{.TownShip}}</td>
+                <td>{{.Detail}}</td>
+                <td class="field is-groued">
+                    <a class="button is-link is-small" href="/user/address/{{.ID}}">
+                        编辑
+                    </a>
+                    <button class="button is-danger is-small">
+                        删减
+                    </button>
+                </td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+<style>
+    .container {
+        max-width: 48rem !important;
+    }
+</style>
+{{end}}

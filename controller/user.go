@@ -5,6 +5,7 @@ import (
 
 	"github.com/Bit0r/online-store/middleware"
 	"github.com/Bit0r/online-store/model"
+	"github.com/Bit0r/online-store/services"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,6 +15,7 @@ func setupUser() {
 	userGroup.Any("/sign-up", handleSignUp)
 	userGroup.GET("/orders", middleware.AuthUserRedirect, getOrders(false))
 	userGroup.GET("/log-out", middleware.AuthUser, handleLogout)
+	userGroup.GET("/address", middleware.AuthUserRedirect, services.GetAddresses)
 }
 
 func handleLogin(ctx *gin.Context) {
