@@ -28,6 +28,7 @@ func Setup() {
 
 	router.Static("/js", "js/")
 	router.Static("/cover", uploadDir+"/cover/")
+	router.Static("/assets", "assets/")
 
 	router.GET("/", func(ctx *gin.Context) {
 		ctx.Redirect(http.StatusFound, "/index")

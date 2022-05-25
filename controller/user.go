@@ -16,6 +16,8 @@ func setupUser() {
 	userGroup.GET("/orders", middleware.AuthUserRedirect, getOrders(false))
 	userGroup.GET("/log-out", middleware.AuthUser, handleLogout)
 	userGroup.GET("/address", middleware.AuthUserRedirect, services.GetAddresses)
+	userGroup.GET("/address/:id", middleware.AuthUserRedirect, services.EditAddress)
+	userGroup.POST("/address", middleware.AuthUserRedirect, services.ReplaceAddress)
 }
 
 func handleLogin(ctx *gin.Context) {

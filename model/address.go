@@ -56,3 +56,45 @@ func GetAddress(id uint64) (address Address, err error) {
 			&address.Detail)
 	return
 }
+
+func CountAddresses(userID uint64) int {
+	query := `select count(*)
+	from address
+	where user_id = ?`
+	var count int
+	db.QueryRow(query, userID).Scan(&count)
+	return count
+}
+
+func AddAddress(address Address) (uint64, error) {
+	query := `insert into address(user_id, consignee, phone, province, city, county, township, detail)
+		values(?, ?, ?, ?, ?, ?, ?, ?)`
+	result, err := db.Exec(query,
+		address.UserID,
+		address.Consignee,
+		address.Phone,
+		address.Province,
+		address.City,
+		address.County,
+		address.TownShip,
+		address.Detail)
+
+	id, _ := result.LastInsertId()
+	return uint64(id), err
+}
+
+func UpdateAddress(address Address) (err error) {
+	query := `update address
+		set consignee = ?, phone = ?, province = ?, city = ?, county = ?, township = ?, detail = ?
+		where id = ?`
+	_, err = db.Exec(query,
+		address.Consignee,
+		address.Phone,
+		address.Province,
+		address.City,
+		address.County,
+		address.TownShip,
+		address.Detail,
+		address.ID)
+	return
+}
