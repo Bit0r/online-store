@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/Bit0r/online-store/model"
+	"github.com/Bit0r/online-store/view"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,6 +17,14 @@ func GetAddresses(ctx *gin.Context) {
 		ctx.Status(http.StatusInternalServerError)
 		return
 	}
+
+	buttons := ctx.MustGet("buttons").(view.Buttons)
+	buttons = append(buttons, view.Button{
+		Text:  "添加收货地址",
+		URL:   "./0",
+		Class: "is-primary",
+	})
+	ctx.Set("buttons", buttons)
 
 	ctx.Set("tpl_files", []string{"layout.html", "navbar.html", "addresses.html"})
 	ctx.Set("tpl_data", struct {
@@ -38,6 +47,7 @@ func EditAddress(ctx *gin.Context) {
 	var address model.Address
 	if id == 0 {
 		// 如果是新增地址，则不需要查询数据库
+		ctx.Set("tpl_data", address)
 		return
 	}
 
