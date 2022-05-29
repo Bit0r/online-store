@@ -22,12 +22,19 @@ func handleShowCart(ctx *gin.Context) {
 
 	files := []string{"layout.html", "navbar.html", "shopping-cart.html"}
 
+	addresses, err := model.GetAddresses(id)
+	if err != nil {
+		log.Println(err)
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
 	data := struct {
 		model.CartBooks
-		model.CartAddresses
+		model.Addresses
 	}{
 		model.GetCartItems(id),
-		model.GetCartAddresses(id)}
+		addresses}
 
 	ctx.Set("tpl_files", files)
 	ctx.Set("tpl_data", data)

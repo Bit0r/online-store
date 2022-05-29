@@ -22,8 +22,7 @@ func AuthUserRedirect(ctx *gin.Context) {
 }
 
 func isLogged(ctx *gin.Context) bool {
-	_, ok := ctx.Get("userID")
-	return ok
+	return ctx.GetBool("isLoggedIn")
 }
 
 func LogIn(ctx *gin.Context, userID uint64) {

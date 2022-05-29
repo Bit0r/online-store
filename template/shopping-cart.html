@@ -44,8 +44,11 @@
                         <div class="select">
                             <select name="addressID" required>
                                 <option value="">选择收货地址</option>
-                                {{range .CartAddresses}}
-                                <option value="{{.ID}}">{{.Name}}——{{.Recipient}}, {{.Phone}}</option>
+                                {{range .Addresses}}
+                                <option value="{{.ID}}">
+                                    {{- .Consignee -}}，{{- .Phone -}}：
+                                    {{- .Province -}}-{{- .City -}}-{{- .County -}}-{{- .TownShip -}}-{{- .Detail -}}
+                                </option>
                                 {{end}}
                             </select>
                         </div>

@@ -1,7 +1,5 @@
 package model
 
-import "log"
-
 type CartBook struct {
 	ID              uint64
 	Name, Author    string
@@ -9,15 +7,7 @@ type CartBook struct {
 	Price, Subtotal float64
 }
 
-type CartAddress struct {
-	ID        uint
-	Name      string
-	Recipient string
-	Phone     string
-}
-
 type CartBooks = []CartBook
-type CartAddresses = []CartAddress
 
 func AddCartItem(userID, bookID uint64) error {
 	tx, err := db.Begin()
@@ -71,25 +61,6 @@ func UpdateCartItem(userID, bookID uint64, quantity uint) (err error) {
 		set quantity = ?
 		where user_id = ? and book_id = ?`
 		_, err = db.Exec(query, quantity, userID, bookID)
-	}
-	return
-}
-
-func GetCartAddresses(userID uint64) (addresses CartAddresses) {
-	query := `select id, name, recipient, phone
-	from address
-	where user_id = ?`
-	rs, _ := db.Query(query, userID)
-	defer rs.Close()
-
-	var address CartAddress
-	for rs.Next() {
-		err := rs.Scan(&address.ID, &address.Name, &address.Recipient, &address.Phone)
-		if err != nil {
-			log.Println(err)
-		} else {
-			addresses = append(addresses, address)
-		}
 	}
 	return
 }
