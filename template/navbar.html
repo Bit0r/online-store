@@ -39,6 +39,11 @@
                     <a href="/user/password" class="navbar-item">
                         修改密码
                     </a>
+                    {{if hasPrivilege "user"}}
+                    <a href="/admin/users" class="navbar-item">
+                        权限管理
+                    </a>
+                    {{end}}
                 </div>
             </div>
             {{end}}

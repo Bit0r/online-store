@@ -13,10 +13,10 @@ type Paging struct {
 func Pagination(ctx *gin.Context) {
 	paging := Paging{Total: 0}
 	current, err := strconv.Atoi(ctx.Query("page"))
-	if err != nil || current == 0 {
-		paging.Cur = 1
-	} else {
+	if err == nil && current != 0 {
 		paging.Cur = uint64(current)
+	} else {
+		paging.Cur = 1
 	}
 	ctx.Set("paging", paging)
 

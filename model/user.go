@@ -3,10 +3,20 @@ package model
 import (
 	"log"
 	"strings"
+	"time"
 
 	"github.com/Bit0r/online-store/model/perm"
 	"golang.org/x/crypto/bcrypt"
 )
+
+type User struct {
+	ID           uint64
+	Name         string
+	CreationTime time.Time
+	Privileges   []string
+}
+
+type Users = []User
 
 func VerifyUser(name, passwd string) (id uint64) {
 	var hash string
@@ -96,4 +106,59 @@ func HasPrivileges(userID uint64, privileges []string) bool {
 	flag := false
 	db.QueryRow(query, args...).Scan(&flag)
 	return flag
+}
+
+func CountUsers() (count uint64) {
+	query := `select count(*)
+	from user`
+	db.QueryRow(query).Scan(&count)
+	return
+}
+
+func GetUsers(isAdmin bool, limit Limit) (users Users, err error) {
+	query := `select distinct id, name, creation_time`
+
+	if isAdmin {
+		query += ` from user u, user_privilege up
+		where u.id = up.user_id`
+	} else {
+		query += ` from user u
+		left join user_privilege up
+		on u.id = up.user_id
+		where up.user_id is null`
+	}
+
+	query += " limit ?, ?"
+
+	rows, err := db.Query(query, limit.Offset, limit.Count)
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+
+	query = `select privilege
+	from user_privilege
+	where user_id = ?`
+	var user User
+	for rows.Next() {
+		err = rows.Scan(&user.ID, &user.Name, &user.CreationTime)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
+		if !isAdmin {
+			users = append(users, user)
+			continue
+		}
+
+		// 如果是管理员，则获取所有权限
+		user.Privileges, err = GetPrivileges(user.ID)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		users = append(users, user)
+	}
+	return users, nil
 }

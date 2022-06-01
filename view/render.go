@@ -28,7 +28,7 @@ func TemplateExecute(ctx *gin.Context) {
 	}
 
 	tpl, _ := template.New("layout").
-		Funcs(template.FuncMap{"hasPrivileges": hasPrivilege}).ParseFiles(files...)
+		Funcs(template.FuncMap{"hasPrivilege": hasPrivilege}).ParseFiles(files...)
 
 	data := gin.H{}
 	tpl_data, ok := ctx.Get("tpl_data")
