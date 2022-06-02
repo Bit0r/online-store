@@ -25,7 +25,7 @@ func NewByStr(privileges ...string) PrivilegeSet {
 }
 
 func (privileges PrivilegeSet) Has(privilege PrivilegeSet) bool {
-	return privileges&privilege != 0
+	return privileges&privilege == privilege
 }
 
 func (privileges PrivilegeSet) HasPrivilege(privilege string) bool {
