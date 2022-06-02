@@ -108,9 +108,17 @@ func HasPrivileges(userID uint64, privileges []string) bool {
 	return flag
 }
 
-func CountUsers() (count uint64) {
-	query := `select count(*)
-	from user`
+func CountUsers(isAdmin bool) (count uint64) {
+	query := "select count(distinct id)"
+	if isAdmin {
+		query += ` from user u, user_privilege up
+		where u.id = up.user_id`
+	} else {
+		query += ` from user u
+		left join user_privilege up
+		on u.id = up.user_id
+		where up.user_id is null`
+	}
 	db.QueryRow(query).Scan(&count)
 	return
 }

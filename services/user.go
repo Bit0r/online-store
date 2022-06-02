@@ -14,7 +14,7 @@ func ShowUsers(ctx *gin.Context) {
 	step := uint64(10)
 
 	paging := ctx.MustGet("paging").(view.Paging)
-	count := model.CountUsers()
+	count := model.CountUsers(isAdmin)
 	paging.Total = count/step + 1
 	ctx.Set("paging", paging)
 
