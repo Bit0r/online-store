@@ -187,3 +187,35 @@ func GetUser(id uint64) (user User, err error) {
 	}
 	return
 }
+
+func SetPrivileges(userID uint64, privileges []string) (err error) {
+	txn, err := db.Begin()
+	if err != nil {
+		return
+	}
+	query := `delete from user_privilege
+	where user_id = ?`
+	txn.Exec(query, userID)
+
+	if len(privileges) == 0 {
+		// 如果没有权限，则不需要插入
+		txn.Commit()
+		return
+	}
+
+	holders := strings.Repeat(",(?,?)", len(privileges))[1:]
+	query = "insert into user_privilege(user_id, privilege) values" + holders
+	args := make([]any, len(privileges)*2)
+	for i, priv := range privileges {
+		args[i*2] = userID
+		args[i*2+1] = priv
+	}
+	_, err = txn.Exec(query, args...)
+	if err != nil {
+		// 如果插入失败，则回滚
+		txn.Rollback()
+		return
+	}
+	txn.Commit()
+	return
+}

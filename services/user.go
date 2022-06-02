@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/Bit0r/online-store/model"
+	"github.com/Bit0r/online-store/model/perm"
 	"github.com/Bit0r/online-store/view"
 	"github.com/gin-gonic/gin"
 	"github.com/samber/lo"
@@ -52,4 +53,31 @@ func EditPriv(ctx *gin.Context) {
 		"User":    user,
 		"HasPriv": lo.Contains[string],
 	})
+}
+
+func GrantPriv(ctx *gin.Context) {
+	userID, err := strconv.ParseUint(ctx.PostForm("user_id"), 10, 64)
+	if err != nil {
+		ctx.Status(http.StatusBadRequest)
+		return
+	}
+
+	privileges := ctx.PostFormArray("privileges")
+	selfPrivileges := ctx.MustGet("privileges").(perm.PrivilegeSet)
+	for _, priv := range privileges {
+		// 检查自身是否有相应权限授权给其他用户
+		if !selfPrivileges.HasPrivilege(priv) {
+			ctx.Status(http.StatusForbidden)
+			return
+		}
+	}
+
+	err = model.SetPrivileges(userID, privileges)
+
+	if err != nil {
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	ctx.Redirect(http.StatusSeeOther, "./user")
 }
