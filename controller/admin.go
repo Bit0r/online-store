@@ -9,4 +9,5 @@ func setupAdmin() {
 	adminGroup := router.Group("/admin", middleware.AuthUser)
 	adminGroup.GET("/orders", middleware.Permission("order"), getOrders(true))
 	adminGroup.GET("/users", middleware.Permission("user"), services.ShowUsers)
+	adminGroup.GET("/user/:id", middleware.Permission("user"), services.EditPriv)
 }

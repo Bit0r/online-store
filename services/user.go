@@ -2,6 +2,7 @@ package services
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/Bit0r/online-store/model"
 	"github.com/Bit0r/online-store/view"
@@ -30,5 +31,25 @@ func ShowUsers(ctx *gin.Context) {
 		"Users":   users,
 		"HasPriv": lo.Contains[string],
 		"IsAdmin": isAdmin,
+	})
+}
+
+func EditPriv(ctx *gin.Context) {
+	userID, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	if err != nil {
+		ctx.Status(http.StatusBadRequest)
+		return
+	}
+
+	user, err := model.GetUser(userID)
+	if err != nil {
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	ctx.Set("tpl_files", []string{"layout.html", "navbar.html", "priv-editor.html"})
+	ctx.Set("tpl_data", gin.H{
+		"User":    user,
+		"HasPriv": lo.Contains[string],
 	})
 }

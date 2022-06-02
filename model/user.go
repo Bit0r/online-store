@@ -170,3 +170,20 @@ func GetUsers(isAdmin bool, limit Limit) (users Users, err error) {
 	}
 	return users, nil
 }
+
+func GetUser(id uint64) (user User, err error) {
+	query := `select id, name, creation_time
+	from user
+	where id = ?`
+
+	err = db.QueryRow(query, id).Scan(&user.ID, &user.Name, &user.CreationTime)
+	if err != nil {
+		return
+	}
+
+	user.Privileges, err = GetPrivileges(id)
+	if err != nil {
+		return
+	}
+	return
+}
