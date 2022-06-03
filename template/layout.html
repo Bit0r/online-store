@@ -1,4 +1,5 @@
 {{define "layout"}}
+<!DOCTYPE html>
 <html lang="zh-CN">
 
 <head>
@@ -9,6 +10,12 @@
     <link rel="stylesheet" href="http://cdn.staticfile.org/font-awesome/5.15.4/css/all.min.css">
     <script defer src="/js/modal.js"></script>
     <script defer src="/js/navbar.js"></script>
+    <style>
+        body {
+            margin: auto;
+            max-width: 95vw;
+        }
+    </style>
 </head>
 
 <body>
@@ -18,13 +25,6 @@
     {{template "pagination.html" .}}
     {{end}}
 </body>
-
-<style>
-    body {
-        margin: auto;
-        max-width: 95vw;
-    }
-</style>
 
 </html>
 {{end}}
