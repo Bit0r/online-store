@@ -32,15 +32,37 @@ func getOrders(needAdmin bool) gin.HandlerFunc {
 		userID := ctx.GetUint64("userID")
 		isAdmin := ctx.MustGet("privileges").(perm.PrivilegeSet).HasPrivilege("order")
 
+		step := uint64(4)
+		paging := ctx.MustGet("paging").(view.Paging)
 		var orders model.Orders
+		offset := (paging.Cur - 1) * step
 		switch {
 		case needAdmin && isAdmin:
-			orders, _ = model.GetOrders(0, 0, 0)
+			userID = 0
 		case !needAdmin:
-			orders, _ = model.GetOrders(userID, 0, 0)
 		default:
 			ctx.Status(http.StatusForbidden)
 		}
+
+		// 获取订单信息
+		orders, err := model.GetOrders(userID, offset, step)
+		if err != nil {
+			log.Println(err)
+			ctx.Status(http.StatusInternalServerError)
+			return
+		}
+
+		// 获取订单数量
+		count, err := model.CountOrders(userID)
+		if err != nil {
+			log.Println(err)
+			ctx.Status(http.StatusInternalServerError)
+			return
+		}
+
+		// 设置分页信息
+		paging.Total = count/step + 1
+		ctx.Set("paging", paging)
 
 		for idx := range orders {
 			orders[idx].Status = statusI18n[orders[idx].Status]
@@ -53,10 +75,6 @@ func getOrders(needAdmin bool) gin.HandlerFunc {
 				append(ctx.MustGet("buttons").(view.Buttons),
 					view.Button{Text: "所有订单", URL: "/admin/orders", Class: "is-danger"}))
 		}
-
-		paging, _ := ctx.MustGet("paging").(view.Paging)
-		paging.Total = 1
-		ctx.Set("paging", paging)
 	}
 }
 

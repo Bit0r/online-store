@@ -81,6 +81,20 @@ func AddOrder(userID uint64, addressID uint, booksID []uint64) (uint64, error) {
 	return uint64(orderID), nil
 }
 
+func CountOrders(userID uint64) (count uint64, err error) {
+	query := `select count(*)
+	from orders`
+
+	args := []any{}
+	if userID != 0 {
+		query += ` where user_id = ?`
+		args = append(args, userID)
+	}
+
+	err = db.QueryRow(query, args...).Scan(&count)
+	return
+}
+
 func GetOrders(userID, offset, row_count uint64) (orders Orders, err error) {
 	query := `select id, order_time, total, status
 	from orders`
