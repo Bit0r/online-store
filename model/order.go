@@ -154,6 +154,14 @@ func UpdateOrderStatus(id uint64, status string) (err error) {
 	set status = ?
 	where id = ?`
 	_, err = db.Exec(query, status, id)
+
+	// 增加成功购买量
+	if status == "success" {
+		err := AddPurchasedNum(id)
+		if err != nil {
+			log.Println(err)
+		}
+	}
 	return
 }
 

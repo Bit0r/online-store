@@ -29,20 +29,24 @@ func setupOrder() {
 
 func getOrders(needAdmin bool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		userID := ctx.GetUint64("userID")
+
 		isAdmin := ctx.MustGet("privileges").(perm.PrivilegeSet).HasPrivilege("order")
 
-		step := uint64(4)
-		paging := ctx.MustGet("paging").(view.Paging)
 		var orders model.Orders
-		offset := (paging.Cur - 1) * step
+		var userID uint64
 		switch {
 		case needAdmin && isAdmin:
 			userID = 0
 		case !needAdmin:
+			userID = ctx.GetUint64("userID")
 		default:
 			ctx.Status(http.StatusForbidden)
 		}
+
+		// 获取分页信息
+		step := uint64(3)
+		paging := ctx.MustGet("paging").(view.Paging)
+		offset := (paging.Cur - 1) * step
 
 		// 获取订单信息
 		orders, err := model.GetOrders(userID, offset, step)

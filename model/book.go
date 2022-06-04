@@ -117,7 +117,7 @@ func consBookQuery(cols string, filter BooksFilter) (query string, args []any) {
 		args = append(args, info, "%"+info+"%", "%"+info+"%")
 	}
 
-	query += " order by id desc"
+	query += " order by purchased desc, id desc"
 
 	return
 }
@@ -185,4 +185,12 @@ func UpdateCategories(bookID uint64, categories []string) (err error) {
 
 	txn.Exec(query, args...)
 	return txn.Commit()
+}
+
+func AddPurchasedNum(bookID uint64) (err error) {
+	query := `update book
+	set purchased = purchased + 1
+	where id = ?`
+	_, err = db.Exec(query, bookID)
+	return
 }
